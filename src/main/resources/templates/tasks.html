@@ -19,12 +19,49 @@
         .task-item:hover {
             background-color: rgba(0, 0, 0, 0.03);
         }
-
+        .completed {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
         .task-actions {
             visibility: hidden;
         }
         .task-item:hover .task-actions {
             visibility: visible;
+        }
+        .filter-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        .filter-tab {
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            margin: 0 0.3rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+        }
+        .filter-tab.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .filter-tab:hover:not(.active) {
+            background-color: #f8f9fa;
+        }
+        .filter-badge {
+            background-color: #e7e9eb;
+            color: #6c757d;
+            font-size: 0.7rem;
+            border-radius: 50px;
+            padding: 0.2rem 0.6rem;
+            margin-left: 0.5rem;
+        }
+        .filter-tab.active .filter-badge {
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
         }
     </style>
 </head>
@@ -34,27 +71,41 @@
             <h1 class="text-center mb-4">Todo Application</h1>
             
             <!-- Add Task Form -->
-            <form action="/" method="post" class="mb-4">
+            <form th:action="@{/(filter=${activeFilter})}" method="post" class="mb-4">
                 <div class="input-group">
-                    <label>
-                        <input type="text" name="title" class="form-control" placeholder="Add a new task" required>
-                    </label>
+                    <input type="text" name="title" class="form-control" placeholder="Add a new task" required>
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-plus"></i> Add
                     </button>
                 </div>
             </form>
             
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <a th:href="@{/(filter=all)}" class="filter-tab" th:classappend="${activeFilter == 'all' ? 'active' : ''}">
+                    All <span class="filter-badge" th:text="${allCount}">0</span>
+                </a>
+                <a th:href="@{/(filter=active)}" class="filter-tab" th:classappend="${activeFilter == 'active' ? 'active' : ''}">
+                    Active <span class="filter-badge" th:text="${activeCount}">0</span>
+                </a>
+                <a th:href="@{/(filter=completed)}" class="filter-tab" th:classappend="${activeFilter == 'completed' ? 'active' : ''}">
+                    Completed <span class="filter-badge" th:text="${completedCount}">0</span>
+                </a>
+            </div>
+            
             <!-- Task List -->
             <div class="list-group">
-                <div th:if="${#lists.isEmpty(tasks)}" class="text-center text-muted py-3">
-                    <i class="bi bi-inbox fs-4"></i>
-                    <p class="mb-0">No tasks yet. Add your first task above!</p>
+                <div th:if="${#lists.isEmpty(tasks)}" class="text-center text-muted py-4">
+                    <i class="bi bi-inbox fs-1 mb-3"></i>
+                    <p class="mb-0" th:text="${activeFilter == 'all' ? 'No tasks yet. Add your first task above!' : 
+                                           (activeFilter == 'active' ? 'No active tasks found.' : 'No completed tasks found.')}">
+                        No tasks yet.
+                    </p>
                 </div>
                 
                 <div th:each="task : ${tasks}" class="list-group-item task-item d-flex align-items-center justify-content-between py-3 border-0 border-bottom">
                     <div class="d-flex align-items-center">
-                        <a th:href="@{'/toggle/' + ${task.id}}" class="me-3 text-decoration-none">
+                        <a th:href="@{'/toggle/' + ${task.id} + '?filter=' + ${activeFilter}}" class="me-3 text-decoration-none">
                             <i th:if="${task.completed}" class="bi bi-check-circle-fill text-success fs-5"></i>
                             <i th:unless="${task.completed}" class="bi bi-circle text-secondary fs-5"></i>
                         </a>
@@ -62,7 +113,7 @@
                     </div>
                     
                     <div class="task-actions">
-                        <form th:action="@{'/delete/' + ${task.id}}" method="post" class="d-inline">
+                        <form th:action="@{'/delete/' + ${task.id} + '?filter=' + ${activeFilter}}" method="post" class="d-inline">
                             <input type="hidden" name="_method" value="delete">
                             <button type="submit" class="btn btn-sm btn-outline-danger">
                                 <i class="bi bi-trash"></i>
@@ -70,6 +121,17 @@
                         </form>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Action Bar - Only show when there are completed tasks -->
+            <div class="d-flex justify-content-end mt-3" th:if="${completedCount > 0}">
+                <form th:action="@{/clear-completed}" method="post" class="d-inline">
+                    <input type="hidden" name="_method" value="delete">
+                    <input type="hidden" name="filter" th:value="${activeFilter}">
+                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                        Clear completed
+                    </button>
+                </form>
             </div>
         </div>
     </div>
