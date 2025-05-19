@@ -4,9 +4,7 @@ import com.app.models.Task;
 import com.app.service.TaskService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -34,6 +32,24 @@ public class TaskController {
     public String CreateTask(@RequestParam String title) {
 
         taskService.createTask(title);
+
+        return "redirect:/";
+
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public String deleteTask(@PathVariable Long id) {
+
+        taskService.deleteTask(id);
+
+        return "redirect:/";
+
+    }
+
+    @GetMapping("toggle/{id}")
+    public String toggleTask(@PathVariable Long id) {
+
+        taskService.toggleTask(id);
 
         return "redirect:/";
 
