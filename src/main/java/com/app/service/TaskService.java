@@ -48,4 +48,9 @@ public class TaskService {
         task.setCompleted(!task.isCompleted());
         taskRepository.save(task);
     }
+    
+    public void clearCompletedTasks() {
+        List<Task> completedTasks = getCompletedTasks();
+        taskRepository.deleteAll(completedTasks);
+    }
 }

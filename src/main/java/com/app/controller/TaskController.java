@@ -59,4 +59,10 @@ public class TaskController {
         taskService.toggleTask(id);
         return "redirect:/?filter=" + filter;
     }
+    
+    @DeleteMapping("/clear-completed")
+    public String clearCompleted(@RequestParam(required = false, defaultValue = "all") String filter) {
+        taskService.clearCompletedTasks();
+        return "redirect:/?filter=" + filter;
+    }
 }
